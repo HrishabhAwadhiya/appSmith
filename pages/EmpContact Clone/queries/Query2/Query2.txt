@@ -1,0 +1,1 @@
+Select IIL_COMP_LOC_ID as "IIL_COMP_LOC_ID",  coalesce(IIL_COMP_LOC_NAME,'') as "IIL_COMP_LOC_NAME" from iil_comp_locations where IIL_COMP_ENABLED=-1 

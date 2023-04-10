@@ -1,0 +1,66 @@
+Select EMPLOYEEID, EMPLOYEENAME, EMAIL, MOBILE, EMP_EXTN, IIL_DEPT_NAME, IIL_FUNC_AREA_NAME, IIL_COMP_LOC_NAME, CAMPAIGN_DID,  (SELECT COUNT(1) DOTTED_MGRNAME FROM IIL_DOTTED_MANAGER E WHERE DOTTED_EMPLOYEE_ID =B.EMPLOYEEID ) CNT_DOTTED  FROM  (SELECT EMPLOYEEID , EMPLOYEENAME , EMAIL , MOBILE, EMP_EXTN, IIL_DEPT_NAME,	IIL_FUNC_AREA_NAME , IIL_COMP_LOC_NAME 	,CASE  WHEN CAMPAIGN_DID IS NULL THEN NULL ELSE '+'||CAMPAIGN_DID END CAMPAIGN_DID,VIRTUALCONTACT,  CASE ISPOOL WHEN 'N' THEN CASE  WHEN EMPLOYEE_WEBERP_ACCESS_TYPE = 'R' THEN CASE  WHEN IIL_COMP_LOCATIONS.FK_IIL_PARTNER_ID IS NULL THEN 'Insource' ELSE 'Outsource' END WHEN EMPLOYEE_WEBERP_ACCESS_TYPE = 'T' THEN 'Provisional' WHEN EMPLOYEE_WEBERP_ACCESS_TYPE = 'I' THEN 'Intern' WHEN EMPLOYEE_WEBERP_ACCESS_TYPE = 'A' THEN 'Agent' WHEN EMPLOYEE_WEBERP_ACCESS_TYPE IS NULL THEN 'Indiamart' END WHEN 'Y' THEN 'Pool' END ENDEMPLOYEE_TYPE from EMPLOYEE, IIL_COMP_LOCATIONS  where {{(function() {
+	let str1 = "FK_IIL_COMP_LOCATION_ID = IIL_COMP_LOC_ID AND WORKING=-1 AND EMPLOYEEID= "
+	var Empid = Input1.text;
+	str1 = str1 + Empid ;
+	var str=" ", vertical,location;
+	var outsorc , pool, agent,intern;
+	var i = 0;
+	var chk ;
+	const idx = CheckboxGroup1.selectedValues.findIndex(curr => curr == 'IM Employee' || curr == 'IM Insource')
+	if(idx != -1)
+	{chk = CheckboxGroup1.selectedValues.findIndex(curr => curr == 'IM Employee')
+	 if (chk != -1)	
+	 { str =  str + "    (  ISPOOL = 'N'  AND EMPLOYEE_WEBERP_ACCESS_TYPE IS NULL)   ";  	  chk = CheckboxGroup1.selectedValues.findIndex(curr => curr == 'IM Insource')
+	  if(chk!=-1)
+			str = str + "OR (  ISPOOL = 'N'  AND (EMPLOYEE_WEBERP_ACCESS_TYPE='R' AND                         IIL_COMP_LOCATIONS.FK_IIL_PARTNER_ID IS NULL))  ";
+	 
+	 } 
+	 else
+	 {chk = CheckboxGroup1.selectedValues.findIndex(curr => curr == 'IM Insource')
+    if(chk != -1)
+			str = str +  "        (  ISPOOL = 'N'  AND (EMPLOYEE_WEBERP_ACCESS_TYPE='R' AND        IIL_COMP_LOCATIONS.FK_IIL_PARTNER_ID IS NULL))   "; }
+	 i = 1;
+	
+	}
+	outsorc = CheckboxGroup1.selectedValues.findIndex(curr => curr == 'IM Outsource')
+	if (outsorc != -1)
+		{
+			if (i=1)
+			{str = str +  "     OR " }
+			str = str + "     (  ISPOOL = 'N'  AND  EMPLOYEE_WEBERP_ACCESS_TYPE ='R' AND IIL_COMP_LOCATIONS.FK_IIL_PARTNER_ID IS NOT NULL)   " ;
+			i = 1;
+		}
+	pool =  CheckboxGroup1.selectedValues.findIndex(curr => curr == 'Including Pool')
+	if(pool != -1)
+		{
+			if (i=1)
+				{ str = str + "     OR   "}
+			str = str + "   (  ISPOOL = 'Y' AND (EMPLOYEE_WEBERP_ACCESS_TYPE is null OR                EMPLOYEE_WEBERP_ACCESS_TYPE ='R') ) "
+		}
+	intern = CheckboxGroup1.selectedValues.findIndex(curr => curr == 'Intern')
+	if(intern != -1)
+	{	if(i =1 )
+	  {str = str +  "     OR   "}
+	  str = str + "   (  ISPOOL = 'N' AND EMPLOYEE_WEBERP_ACCESS_TYPE ='I') " }
+	agent = CheckboxGroup1.selectedValues.findIndex(curr => curr == 'Agent')
+	 if(agent != -1)
+		{
+			if(i=1) {
+				str = str +"     OR   "
+			}
+			str = str + "(  ISPOOL = 'N' AND EMPLOYEE_WEBERP_ACCESS_TYPE ='A') "
+		}
+	 if(str.length > 0)
+		 str = " and ( " + str + " ) ";
+	str1 = str1 + str;
+	vertical = Select1.selectedOptionValue 
+	if (Select1.selectedOptionValue) {
+		str1 = str1 + " and FK_IIL_VERTICAL_ID = " +  Select1.selectedOptionValue;
+	}
+		location = Select2.selectedOptionValue
+	if (Select2.selectedOptionValue) {
+  str1 = str1 + " and FK_IIL_COMP_LOCATION_ID = " +  Select2.selectedOptionValue ;
+  } 
+	str1 = str1 + "Order By EMPLOYEENAME) as B "
+	return	 str1;
+})()}}
